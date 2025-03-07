@@ -423,9 +423,8 @@ const ProvisioningPage = () => {
           
           <div className="mt-4">
             
-              href="/login"
+            <a href="/login"
               className="text-sm text-indigo-600 hover:text-indigo-500"
-            >
               Already have an account? Sign in
             </a>
           </div>

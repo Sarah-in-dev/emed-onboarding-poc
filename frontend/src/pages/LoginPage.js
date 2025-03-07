@@ -115,9 +115,8 @@ const LoginPage = () => {
           
           <div className="text-center">
             
-              href="/provision"
+            <a href="/provision"
               className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
               New company? Sign up here
             </a>
           </div>
