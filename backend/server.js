@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 
 // Configure PostgreSQL connection
 const pool = new Pool({
-  connectionString: process.env.postgresql://postgres:ygxxfU2sFhfmPqTg@db.lueacyfldtrjbtvsdiaf.supabase.co:5432/postgres,
+  connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
