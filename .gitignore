@@ -1,8 +1,6 @@
 node_modules
 .env
 .DS_Store
-.vercel
-build
-dist
-.vscode
 npm-debug.log
+build
+.vercel
