@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 
 // Configure middleware
 app.use(cors({
-  origin: ['https://emed-onboarding-poc-frontend.vercel.app', 'http://localhost:3000'],
+  origin:'*',
   credentials: true
 }));
 app.use(bodyParser.json());
