@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Provision API</title>
+  <script>
+    function testAPI() {
+      const data = {
+        companyName: "Test Company",
+        address: "123 Test St",
+        industry: "Technology",
+        size: "1-50",
+        primaryContact: {
+          name: "Test Contact",
+          email: "test@example.com",
+          phone: "555-1234"
+        },
+        adminUser: {
+          name: "Test Admin",
+          email: "admin@example.com",
+          title: "Admin"
+        },
+        planDetails: {
+          startDate: "2023-01-01",
+          estimatedUsers: "10"
+        }
+      };
+
+      fetch('https://emed-onboarding-poc.vercel.app/api/companies/provision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': 'https://emed-onboarding-poc-frontend.vercel.app'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(error => {
+        document.getElementById('result').textContent = 'Error: ' + error;
+      });
+    }
+  </script>
+</head>
+<body>
+  <button onclick="testAPI()">Test Provision API</button>
+  <pre id="result"></pre>
+</body>
+</html>
