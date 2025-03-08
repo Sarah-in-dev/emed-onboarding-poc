@@ -57,29 +57,11 @@ export default {
   getEmployees: (status, search) => api.get('/employees', { params: { status, search } }),
   deactivateEmployee: (userId) => api.put(`/employees/${userId}/deactivate`),
   
-  // Provisioning - Use the regular API first, fallback to proxy if CORS error
-  provisionCompany: async (data) => {
-    try {
-      // First try the direct approach
-      return await api.post('/companies/provision', data);
-    } catch (error) {
-      // If it's a CORS error or network error, try the proxy
-      if (error.message.includes('Network Error') || error.message.includes('CORS')) {
-        console.log('Using CORS proxy as fallback...');
-        const proxyUrl = 'https://corsproxy.io/?';
-        const targetUrl = 'https://emed-onboarding-poc.vercel.app/api/companies/provision';
-        
-        return axios.post(proxyUrl + encodeURIComponent(targetUrl), data, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-      }
-      // Re-throw other errors
-      throw error;
-    }
-  },
-  
+  // Provisioning 
+  provisionCompany: (data) => {
+    //Use direct API call without proxy for simplicity
+    return axios.post('/api/proxy', data);
+  },  
   // Enrollment
   validateCode: (code) => api.post('/codes/validate', { code }),
   enrollUser: (data) => api.post('/enroll', data)

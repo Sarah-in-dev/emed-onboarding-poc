@@ -15,27 +15,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Configure CORS with more detailed settings
-const allowedOrigins = [
+app.use((req, res, next) => {
+  const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://emed-onboarding-poc-frontend.vercel.app' // Add your actual deployed frontend URL
   ];
   
-  app.use(cors({
-    origin: function(origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl requests)
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  }
   
-  // Handle preflight requests
-  app.options('*', cors());
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 // Configure body parser middleware
 app.use(bodyParser.json());

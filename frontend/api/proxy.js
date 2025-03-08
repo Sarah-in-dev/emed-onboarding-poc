@@ -1,3 +1,4 @@
+// frontend/api/proxy.js
 const axios = require('axios');
 
 module.exports = async (req, res) => {
@@ -11,9 +12,11 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
   
+  const backendUrl = process.env.BACKEND_URL || 'https://emed-onboarding-poc.vercel.app';
+  
   try {
     const response = await axios.post(
-      'https://emed-onboarding-poc.vercel.app/api/companies/provision',
+      `${backendUrl}/api/companies/provision`,
       req.body,
       {
         headers: {
@@ -27,8 +30,7 @@ module.exports = async (req, res) => {
     console.error('Proxy error:', error.message);
     return res.status(500).json({ 
       error: 'Proxy error', 
-      details: error.message,
-      stack: error.stack
+      details: error.message
     });
   }
 };
