@@ -9,7 +9,7 @@ const pool = new Pool({
 
 module.exports = async (req, res) => {
   // Set CORS headers directly
-  res.setHeader('Access-Control-Allow-Origin', 'https://emed-onboarding-poc.vercel.app');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
