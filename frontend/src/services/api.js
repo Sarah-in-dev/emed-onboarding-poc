@@ -59,6 +59,7 @@ export default {
   
   // Provisioning 
   provisionCompany: (data) => {
+    console.log('Provision company called wiht data:', data);
     //Use the proxy endpoint
     return axios.post('/api/proxy', data, {
       headers: {
