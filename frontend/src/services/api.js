@@ -59,9 +59,14 @@ export default {
   
   // Provisioning 
   provisionCompany: (data) => {
-    //Use direct API call without proxy for simplicity
-    return axios.post('/api/proxy', data);
+    //Use the proxy endpoint
+    return axios.post('/api/proxy', data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   },  
+
   // Enrollment
   validateCode: (code) => api.post('/codes/validate', { code }),
   enrollUser: (data) => api.post('/enroll', data)
