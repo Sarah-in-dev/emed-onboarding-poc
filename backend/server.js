@@ -39,6 +39,7 @@ const allowedOrigins = [
 
 // Configure body parser middleware
 app.use(bodyParser.json());
+
 // Configure PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
