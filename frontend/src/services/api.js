@@ -59,16 +59,16 @@ export default {
   
   // Provisioning
   provisionCompany: (data) => {
-  // Using a CORS proxy
-  const proxyUrl = 'https://corsproxy.io/?';
-  const targetUrl = 'https://emed-onboarding-poc.vercel.app/api/companies/provision';
-  
-  return axios.post(proxyUrl + encodeURIComponent(targetUrl), data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-}
+    // Using a CORS proxy
+    const proxyUrl = 'https://corsproxy.io/?';
+    const targetUrl = 'https://emed-onboarding-poc.vercel.app/api/companies/provision';
+    
+    return axios.post(proxyUrl + encodeURIComponent(targetUrl), data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  },
   
   // Enrollment
   validateCode: (code) => api.post('/codes/validate', { code }),
