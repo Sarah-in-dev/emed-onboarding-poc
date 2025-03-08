@@ -1,11 +1,15 @@
 // backend/db.js
-const { Pool } = require('pg');
+const postgres = require('postgres');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+// Log connection attempt for debugging
+console.log('Initializing Supabase connection using postgres package');
+
+const connectionString = process.env.DATABASE_URL;
+const sql = postgres(connectionString, {
   ssl: {
     rejectUnauthorized: false
   }
 });
 
-module.exports = pool;
+// Export the sql client
+module.exports = sql;

@@ -1,11 +1,12 @@
 // backend/api/companies/provision.js
-const { Pool } = require('pg');
+const postgres = require('postgres');
 const bcrypt = require('bcrypt');
 
 // Configure PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+const sql = postgres(process.env.DATABASE_URL, {
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 module.exports = async (req, res) => {
@@ -20,8 +21,6 @@ module.exports = async (req, res) => {
   }
   
   if (req.method === 'POST') {
-    const client = await pool.connect();
-    
     try {
       const { 
         companyName, 
@@ -33,37 +32,42 @@ module.exports = async (req, res) => {
         planDetails
       } = req.body;
       
-      await client.query('BEGIN');
+      console.log('Processing company provision request:', companyName);
+      
+      // Start a transaction
+      const tx = sql.begin();
       
       // Create company
-      const companyResult = await client.query(
-        'INSERT INTO companies (name, address, industry, size) VALUES ($1, $2, $3, $4) RETURNING *',
-        [companyName, address, industry, size]
-      );
+      const companyResult = await sql`
+        INSERT INTO companies (name, address, industry, size) 
+        VALUES (${companyName}, ${address}, ${industry}, ${size}) 
+        RETURNING *
+      `;
       
-      const company = companyResult.rows[0];
+      const company = companyResult[0];
       
       // Generate temporary password
       const tempPassword = `eMed${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const passwordHash = await bcrypt.hash(tempPassword, 10);
       
       // Create admin user
-      const adminResult = await client.query(
-        'INSERT INTO company_admins (company_id, name, email, title, password_hash) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [company.company_id, adminUser.name, adminUser.email, adminUser.title, passwordHash]
-      );
+      const adminResult = await sql`
+        INSERT INTO company_admins (company_id, name, email, title, password_hash) 
+        VALUES (${company.company_id}, ${adminUser.name}, ${adminUser.email}, ${adminUser.title}, ${passwordHash}) 
+        RETURNING *
+      `;
       
-      const admin = adminResult.rows[0];
+      const admin = adminResult[0];
       
       // Get default program (GLP-1)
-      const programResult = await client.query(
-        'SELECT * FROM programs WHERE code = $1',
-        ['GLP1']
-      );
+      const programResult = await sql`
+        SELECT * FROM programs WHERE code = ${'GLP1'}
+      `;
       
-      const program = programResult.rows[0];
+      const program = programResult[0];
       
-      await client.query('COMMIT');
+      // Commit the transaction
+      await tx.commit();
       
       // Generate portal URL based on company name
       const portalName = companyName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -86,15 +90,11 @@ module.exports = async (req, res) => {
       });
       
     } catch (error) {
-      await client.query('ROLLBACK');
       console.error('Provisioning error:', error);
       return res.status(500).json({ 
         error: 'Failed to provision company portal',
-        message: error.message,
-        stack: error.stack
+        message: error.message
       });
-    } finally {
-      client.release();
     }
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
