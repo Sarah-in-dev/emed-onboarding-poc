@@ -14,13 +14,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Configure middleware
-app.use(cors({
-  origin:'*',
-  credentials: true
-}));
-app.use(bodyParser.json());
+// Configure CORS with more detailed settings
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://emed-onboarding-poc-frontend.vercel.app' // Add your actual deployed frontend URL
+  ];
+  
+  app.use(cors({
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+  
+  // Handle preflight requests
+  app.options('*', cors());
 
+// Configure body parser middleware
+app.use(bodyParser.json());
 // Configure PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -140,6 +158,11 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Create new company and admin portal
 app.post('/api/companies/provision', async (req, res) => {
+ // Add these CORS headers
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   const client = await pool.connect();
   
   try {
