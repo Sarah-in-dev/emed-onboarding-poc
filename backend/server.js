@@ -41,12 +41,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 // Configure PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnathorized: false
-  }
-});
+const pool = require('./db');
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
