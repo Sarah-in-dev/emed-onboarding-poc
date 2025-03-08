@@ -58,7 +58,17 @@ export default {
   deactivateEmployee: (userId) => api.put(`/employees/${userId}/deactivate`),
   
   // Provisioning
-  provisionCompany: (data) => api.post('/companies/provision', data),
+  provisionCompany: (data) => {
+  // Using a CORS proxy
+  const proxyUrl = 'https://corsproxy.io/?';
+  const targetUrl = 'https://emed-onboarding-poc.vercel.app/api/companies/provision';
+  
+  return axios.post(proxyUrl + encodeURIComponent(targetUrl), data, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+}
   
   // Enrollment
   validateCode: (code) => api.post('/codes/validate', { code }),
