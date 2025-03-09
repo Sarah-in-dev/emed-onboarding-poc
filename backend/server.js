@@ -21,7 +21,8 @@ const PORT = process.env.PORT || 5000;
 app.use((req, res, next) => {
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:3000',
-    'https://emed-onboarding-poc-frontend.vercel.app'
+    'https://emed-onboarding-poc-frontend.vercel.app',
+    'https://emed-onboarding-poc.vercel.app'
   ];
   
   const origin = req.headers.origin;
