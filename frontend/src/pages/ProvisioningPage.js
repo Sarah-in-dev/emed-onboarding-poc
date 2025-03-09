@@ -406,7 +406,7 @@ const renderCompletionStep = () => {
         <div className="mb-3">
           <p className="text-sm text-gray-500">Portal URL</p>
           <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span className="font-medium">{portalInfo?.portalUrl}</span>
+            <span className="font-medium">{portalInfo?.portalUrl || "URL not available"}</span>
             <button 
               onClick={() => handleCopyToClipboard(portalInfo?.portalUrl)}
               className="text-indigo-600 text-sm"
@@ -419,14 +419,14 @@ const renderCompletionStep = () => {
         <div className="mb-3">
           <p className="text-sm text-gray-500">Admin Email</p>
           <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span>{portalInfo?.credentials?.email}</span>
+            <span>{portalInfo?.credentials?.email || "Email not available"}</span>
           </div>
         </div>
         
         <div>
           <p className="text-sm text-gray-500">Temporary Password</p>
           <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span>{portalInfo?.credentials?.tempPassword}</span>
+            <span>{portalInfo?.credentials?.tempPassword || "Password not available"}</span>
             <button 
               onClick={() => handleCopyToClipboard(portalInfo?.credentials?.tempPassword)}
               className="text-indigo-600 text-sm"
@@ -442,9 +442,7 @@ const renderCompletionStep = () => {
           We've sent these details to the admin email address provided.
         </p>
         <a 
-          href={portalInfo?.portalUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
+          href="/login" 
           className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Go to Portal
