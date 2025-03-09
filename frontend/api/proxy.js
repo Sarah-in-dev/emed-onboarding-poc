@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
   
   // Handle preflight
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request';
+    console.log('Handling OPTIONS request');
     return res.status(200).end();
   }
   
@@ -30,7 +30,9 @@ module.exports = async (req, res) => {
         email: req.body.adminUser?.email || 'admin@example.com'
       },
       credentials: {
-        email: req.body.adminUser?.email || 'admin@example.com',
+        email: req.body.adminUser?.email ? 
+          `${req.body.adminUser.email.split('@')[0]}-${Date.now()}@${req.body.adminUser.email.split('@')[1]}` : 
+          `admin-${Date.now()}@example.com`,
         tempPassword: 'eMedTEMP123'
       },
       portalUrl: `https://emed-care.com/portal/${(req.body.companyName || 'test').toLowerCase().replace(/[^a-z0-9]/g, '')}`
