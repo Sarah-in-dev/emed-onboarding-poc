@@ -28,6 +28,9 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
     res.header('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    // For development, just allow all origins
+    res.header('Access-Control-Allow-Origin', '*');
   }
   
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -162,7 +165,7 @@ app.post('/api/auth/login', async (req, res) => {
 // Create new company and admin portal
 app.post('/api/companies/provision', async (req, res) => {
   // Add these CORS headers
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -178,6 +181,13 @@ app.post('/api/companies/provision', async (req, res) => {
     } = req.body;
     
     console.log('Provisioning company:', companyName);
+    
+    // Make admin email unique by adding timestamp
+    const uniqueEmail = adminUser.email ? 
+      `${adminUser.email.split('@')[0]}-${Date.now()}@${adminUser.email.split('@')[1]}` : 
+      `admin-${Date.now()}@example.com`;
+    
+    console.log('Using unique admin email:', uniqueEmail);
     
     // Start a transaction
     const tx = sql.begin();
@@ -195,21 +205,30 @@ app.post('/api/companies/provision', async (req, res) => {
     const tempPassword = `eMed${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     const passwordHash = await bcrypt.hash(tempPassword, 10);
     
-    // Create admin user
+    // Create admin user with unique email
     const adminResult = await sql`
       INSERT INTO company_admins (company_id, name, email, title, password_hash) 
-      VALUES (${company.company_id}, ${adminUser.name}, ${adminUser.email}, ${adminUser.title}, ${passwordHash}) 
+      VALUES (${company.company_id}, ${adminUser.name}, ${uniqueEmail}, ${adminUser.title}, ${passwordHash}) 
       RETURNING *
     `;
     
     const admin = adminResult[0];
     
-    // Get default program (GLP-1)
-    const programResult = await sql`
-      SELECT * FROM programs WHERE code = ${'GLP1'}
-    `;
+    // Check if GLP1 program exists
+    const programCheckResult = await sql`SELECT * FROM programs WHERE code = ${'GLP1'}`;
     
-    const program = programResult[0];
+    let program;
+    if (programCheckResult.length === 0) {
+      // Create GLP1 program if it doesn't exist
+      const newProgramResult = await sql`
+        INSERT INTO programs (code, name, description, active)
+        VALUES ('GLP1', 'GLP-1 Medication Program', 'Chronic care management program for GLP-1 medications', TRUE)
+        RETURNING *
+      `;
+      program = newProgramResult[0];
+    } else {
+      program = programCheckResult[0];
+    }
     
     // Commit the transaction
     await tx.commit();
@@ -236,7 +255,11 @@ app.post('/api/companies/provision', async (req, res) => {
     
   } catch (error) {
     console.error('Provisioning error:', error);
-    res.status(500).json({ error: 'Failed to provision company portal' });
+    res.status(500).json({ 
+      error: 'Failed to provision company portal',
+      details: error.message,
+      stack: error.stack 
+    });
   }
 });
 
@@ -671,81 +694,149 @@ app.post('/api/webhooks/lab-results', async (req, res) => {
 app.post('/api/seed', async (req, res) => {
     if (process.env.NODE_ENV !== 'development' && process.env.ALLOW_SEED !== 'true') {
         return res.status(403).json({ error: 'Operation not allowed in production' });
-      }
-    
-      try {
+    }
+
+    try {
+        console.log('Starting database seed operation');
+        
+        // Test database connection first
+        try {
+            const testResult = await sql`SELECT NOW()`;
+            console.log('Database connection test successful:', testResult[0].now);
+        } catch (connError) {
+            console.error('Database connection test failed:', connError);
+            return res.status(500).json({ 
+                error: 'Database connection failed', 
+                details: connError.message 
+            });
+        }
+        
         // Start a transaction
+        console.log('Beginning transaction');
         const tx = sql.begin();
         
+        // Check if tables exist
+        try {
+            console.log('Checking if programs table exists');
+            await sql`SELECT * FROM programs LIMIT 1`;
+            console.log('Programs table exists');
+        } catch (tableError) {
+            console.error('Programs table check failed:', tableError);
+            
+            // Try to create the programs table
+            try {
+                console.log('Attempting to create programs table');
+                await sql`
+                    CREATE TABLE IF NOT EXISTS programs (
+                        program_id SERIAL PRIMARY KEY,
+                        code VARCHAR(10) UNIQUE NOT NULL,
+                        name VARCHAR(100) NOT NULL,
+                        description TEXT,
+                        active BOOLEAN DEFAULT TRUE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                `;
+                console.log('Programs table created successfully');
+            } catch (createError) {
+                console.error('Failed to create programs table:', createError);
+                return res.status(500).json({ 
+                    error: 'Failed to create required database tables', 
+                    details: createError.message 
+                });
+            }
+        }
+        
         // Ensure GLP1 program exists
+        console.log('Checking if GLP1 program exists');
         const checkProgram = await sql`SELECT * FROM programs WHERE code = 'GLP1'`;
         
         if (checkProgram.length === 0) {
-          await sql`
-            INSERT INTO programs (code, name, description, active) 
-            VALUES ('GLP1', 'GLP-1 Medication Program', 'Chronic care management program for GLP-1 medications', TRUE)
-          `;
+            console.log('Creating GLP1 program');
+            await sql`
+                INSERT INTO programs (code, name, description, active) 
+                VALUES ('GLP1', 'GLP-1 Medication Program', 'Chronic care management program for GLP-1 medications', TRUE)
+            `;
+            console.log('GLP1 program created');
+        } else {
+            console.log('GLP1 program already exists');
         }
         
         // Create a demo company
+        console.log('Creating demo company');
         const companyResult = await sql`
-          INSERT INTO companies (name, address, industry, size) 
-          VALUES ('Demo Company', '123 Main St, Anytown, USA', 'Technology', '51-200')
-          RETURNING *
+            INSERT INTO companies (name, address, industry, size) 
+            VALUES ('Demo Company', '123 Main St, Anytown, USA', 'Technology', '51-200')
+            RETURNING *
         `;
         
         const company = companyResult[0];
+        console.log('Demo company created with ID:', company.company_id);
         
         // Create demo admin with a predictable but unique email
         const adminEmail = `demo-admin-${Date.now()}@example.com`;
         const passwordHash = await bcrypt.hash('password123', 10);
         
-        await sql`
-          INSERT INTO company_admins (company_id, name, email, title, password_hash)
-          VALUES (${company.company_id}, 'Demo Admin', ${adminEmail}, 'Demo Role', ${passwordHash})
+        console.log('Creating demo admin with email:', adminEmail);
+        const adminResult = await sql`
+            INSERT INTO company_admins (company_id, name, email, title, password_hash)
+            VALUES (${company.company_id}, 'Demo Admin', ${adminEmail}, 'Demo Role', ${passwordHash})
+            RETURNING *
         `;
+        
+        const admin = adminResult[0];
+        console.log('Demo admin created with ID:', admin.admin_id);
         
         // Get GLP1 program
         const programResult = await sql`SELECT * FROM programs WHERE code = 'GLP1'`;
         const program = programResult[0];
         
         // Create a small batch of demo codes
+        console.log('Creating demo code batch');
         const batchResult = await sql`
-          INSERT INTO code_batches (company_id, program_id, quantity, notes)
-          VALUES (${company.company_id}, ${program.program_id}, 10, 'Demo batch')
-          RETURNING *
+            INSERT INTO code_batches (company_id, program_id, quantity, notes)
+            VALUES (${company.company_id}, ${program.program_id}, 10, 'Demo batch')
+            RETURNING *
         `;
         
         const batch = batchResult[0];
+        console.log('Demo batch created with ID:', batch.batch_id);
         
         // Generate a few demo codes
+        console.log('Generating demo enrollment codes');
         for (let i = 0; i < 10; i++) {
-          const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-          const code = `DEMO-GLP1-${randomPart}`;
-          
-          await sql`
-            INSERT INTO enrollment_codes (code, company_id, program_id, batch_id)
-            VALUES (${code}, ${company.company_id}, ${program.program_id}, ${batch.batch_id})
-          `;
+            const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const code = `DEMO-GLP1-${randomPart}`;
+            
+            await sql`
+                INSERT INTO enrollment_codes (code, company_id, program_id, batch_id)
+                VALUES (${code}, ${company.company_id}, ${program.program_id}, ${batch.batch_id})
+            `;
         }
+        console.log('Demo enrollment codes generated');
         
         // Commit transaction
+        console.log('Committing transaction');
         await tx.commit();
+        console.log('Seed operation completed successfully');
         
         res.json({ 
-          success: true,
-          message: 'Demo data created successfully',
-          credentials: {
-            email: adminEmail,
-            password: 'password123'
-          }
+            success: true,
+            message: 'Demo data created successfully',
+            credentials: {
+                email: adminEmail,
+                password: 'password123'
+            }
         });
         
-      } catch (error) {
+    } catch (error) {
         console.error('Demo seeding error:', error);
-        res.status(500).json({ error: 'Failed to create demo data' });
-      }
-    });
+        return res.status(500).json({ 
+            error: 'Failed to create demo data', 
+            details: error.message,
+            stack: error.stack
+        });
+    }
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
