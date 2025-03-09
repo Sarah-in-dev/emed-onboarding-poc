@@ -25,6 +25,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Add this new route to handle portal URLs */}
+          <Route path="/portal/*" element={<Navigate to="/login" />} />
+          
           <Route path="/login" element={<LoginPage />} />
           <Route path="/provision" element={<ProvisioningPage />} />
           <Route path="/enroll" element={<EnrollmentPage />} />
