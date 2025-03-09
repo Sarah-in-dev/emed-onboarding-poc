@@ -666,6 +666,86 @@ app.post('/api/webhooks/lab-results', async (req, res) => {
   }
 });
 
+//Seeding Routes
+app.post('/api/seed', async (req, res) => {
+    if (process.env.NODE_ENV !== 'development' && process.env.ALLOW_SEED !== 'true') {
+        return res.status(403).json({ error: 'Operation not allowed in production' });
+      }
+    
+      try {
+        // Start a transaction
+        const tx = sql.begin();
+        
+        // Ensure GLP1 program exists
+        const checkProgram = await sql`SELECT * FROM programs WHERE code = 'GLP1'`;
+        
+        if (checkProgram.length === 0) {
+          await sql`
+            INSERT INTO programs (code, name, description, active) 
+            VALUES ('GLP1', 'GLP-1 Medication Program', 'Chronic care management program for GLP-1 medications', TRUE)
+          `;
+        }
+        
+        // Create a demo company
+        const companyResult = await sql`
+          INSERT INTO companies (name, address, industry, size) 
+          VALUES ('Demo Company', '123 Main St, Anytown, USA', 'Technology', '51-200')
+          RETURNING *
+        `;
+        
+        const company = companyResult[0];
+        
+        // Create demo admin with a predictable but unique email
+        const adminEmail = `demo-admin-${Date.now()}@example.com`;
+        const passwordHash = await bcrypt.hash('password123', 10);
+        
+        await sql`
+          INSERT INTO company_admins (company_id, name, email, title, password_hash)
+          VALUES (${company.company_id}, 'Demo Admin', ${adminEmail}, 'Demo Role', ${passwordHash})
+        `;
+        
+        // Get GLP1 program
+        const programResult = await sql`SELECT * FROM programs WHERE code = 'GLP1'`;
+        const program = programResult[0];
+        
+        // Create a small batch of demo codes
+        const batchResult = await sql`
+          INSERT INTO code_batches (company_id, program_id, quantity, notes)
+          VALUES (${company.company_id}, ${program.program_id}, 10, 'Demo batch')
+          RETURNING *
+        `;
+        
+        const batch = batchResult[0];
+        
+        // Generate a few demo codes
+        for (let i = 0; i < 10; i++) {
+          const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+          const code = `DEMO-GLP1-${randomPart}`;
+          
+          await sql`
+            INSERT INTO enrollment_codes (code, company_id, program_id, batch_id)
+            VALUES (${code}, ${company.company_id}, ${program.program_id}, ${batch.batch_id})
+          `;
+        }
+        
+        // Commit transaction
+        await tx.commit();
+        
+        res.json({ 
+          success: true,
+          message: 'Demo data created successfully',
+          credentials: {
+            email: adminEmail,
+            password: 'password123'
+          }
+        });
+        
+      } catch (error) {
+        console.error('Demo seeding error:', error);
+        res.status(500).json({ error: 'Failed to create demo data' });
+      }
+    });
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
