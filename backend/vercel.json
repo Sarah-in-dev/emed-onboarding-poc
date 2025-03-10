@@ -5,6 +5,7 @@
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { "src: "/api/test", "dest": "/api/test.js" }.
     {
       "src": "/api/auth/login",
       "methods": ["OPTIONS"],
@@ -13,7 +14,8 @@
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
       },
-      "status": 200
+      "status": 200,
+      "dest": "/server.js"
     },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/server.js" }
