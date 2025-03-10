@@ -65,6 +65,14 @@ const isCompanyAdmin = async (req, res, next) => {
 
 // ===== AUTHENTICATION ROUTES =====
 
+//Create a middleware function for handling OPTIONS preflight requests
+app.options('/api/auth/login', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.status(200).send();
+});
+
 // Company admin login
 app.post('/api/auth/login', async (req, res) => {
   // Add explicit CORS headers for this endpoint
