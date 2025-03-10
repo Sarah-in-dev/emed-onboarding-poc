@@ -70,7 +70,7 @@ app.options('/api/auth/login', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.status(200).send();
+  res.status(200).end();
 });
 
 // Company admin login
@@ -78,7 +78,7 @@ app.post('/api/auth/login', async (req, res) => {
   // Add explicit CORS headers for this endpoint
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   
   try {
     const { email, password } = req.body;
