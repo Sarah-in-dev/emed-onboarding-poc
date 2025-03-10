@@ -7,6 +7,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [apiTestResult, setApiTestResult] = useState(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,26 +18,72 @@ const LoginPage = () => {
     setLoading(true);
     
     try {
+      console.log('Attempting login with email:', email);
       const success = await login(email, password);
       
       if (success) {
+        console.log('Login successful, navigating to dashboard');
         navigate('/dashboard');
       } else {
+        console.log('Login returned unsuccessful');
         setError('Invalid email or password');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
+      console.error('Login error:', err);
+      setError(`An error occurred. Please try again. Details: ${err.message || 'Unknown error'}`);
     }
     
     setLoading(false);
   };
   
+  const testApiConnection = async () => {
+    try {
+      setApiTestResult({ status: 'testing', message: 'Testing API connection...' });
+      
+      // Get the API URL from environment or default
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      console.log('Testing API connection to:', apiUrl);
+      
+      // Test a simple endpoint
+      const response = await fetch(`${apiUrl}/test`);
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('API Test Response:', data);
+      
+      setApiTestResult({
+        status: 'success',
+        message: `API connection successful! Server time: ${data.timestamp}`,
+        data
+      });
+    } catch (error) {
+      console.error('API Test Error:', error);
+      setApiTestResult({
+        status: 'error',
+        message: `API connection failed: ${error.message}`
+      });
+    }
+  };
+  
   const handleSeedDatabase = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/seed`, {
+      setLoading(true);
+      setError('');
+      
+      // Get the API URL from environment or default
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      console.log('Seeding database using API at:', apiUrl);
+      
+      const response = await fetch(`${apiUrl}/seed`, {
         method: 'POST'
       });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
       
       const data = await response.json();
       
@@ -45,11 +92,13 @@ const LoginPage = () => {
         setEmail(data.credentials.email);
         setPassword(data.credentials.password);
       } else {
-        alert('Failed to seed database');
+        alert('Failed to seed database: ' + (data.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Seeding error:', error);
-      alert('An error occurred while seeding the database');
+      alert(`An error occurred while seeding the database: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -68,6 +117,21 @@ const LoginPage = () => {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+        
+        {apiTestResult && (
+          <div className={`border px-4 py-3 rounded relative ${
+            apiTestResult.status === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 
+            apiTestResult.status === 'error' ? 'bg-red-100 border-red-400 text-red-700' : 
+            'bg-blue-100 border-blue-400 text-blue-700'
+          }`}>
+            <span className="block sm:inline">{apiTestResult.message}</span>
+            {apiTestResult.data && (
+              <pre className="mt-2 text-xs overflow-x-auto">
+                {JSON.stringify(apiTestResult.data, null, 2)}
+              </pre>
+            )}
           </div>
         )}
         
@@ -113,18 +177,26 @@ const LoginPage = () => {
             </button>
           </div>
           
-          <div className="text-center">
-            
+          <div className="flex justify-between">
             <a href="/provision"
               className="font-medium text-indigo-600 hover:text-indigo-500">
               New company? Sign up here
             </a>
+            
+            <button
+              type="button"
+              onClick={testApiConnection}
+              className="font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              Test API Connection
+            </button>
           </div>
           
           <div className="text-center pt-4 border-t">
             <button
               type="button"
               onClick={handleSeedDatabase}
+              disabled={loading}
               className="font-medium text-gray-600 hover:text-gray-500"
             >
               Seed Database (Demo)
