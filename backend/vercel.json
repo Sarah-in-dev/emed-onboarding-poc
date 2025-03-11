@@ -1,24 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
-    { "src": "api/**/*.js", "use": "@vercel/node" }
+    { "src": "server.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src: "/api/test", "dest": "/api/test.js" }.
-    {
-      "src": "/api/auth/login",
-      "methods": ["OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
-      },
-      "status": 200,
-      "dest": "/server.js"
-    },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/server.js" }
-  ],
-  "outputDirectory": "."
+    { "src": "/(.*)", "dest": "server.js" }
+  ]
 }
