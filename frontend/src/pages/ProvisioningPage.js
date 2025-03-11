@@ -344,211 +344,223 @@ const ProvisioningPage = () => {
     return (
       <div className="space-y-4">
         <h2 className="text-xl font-bold flex items-center">
-          <svg className="h-5 w-5 mr-2 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        GLP-1 Program Details
-      </h2>
-      <div className="space-y-3">
-        <div>
-          <label className="block mb-1 font-medium">Planned Start Date *</label>
-          <input
-            type="date"
-            value={formData.planDetails.startDate}
-            onChange={(e) => updateFormData('planDetails', 'startDate', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Estimated Number of Participants *</label>
-          <input
-            type="number"
-            value={formData.planDetails.estimatedUsers}
-            onChange={(e) => updateFormData('planDetails', 'estimatedUsers', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="100"
-            min="1"
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Additional Notes</label>
-          <textarea
-            value={formData.planDetails.additionalNotes}
-            onChange={(e) => updateFormData('planDetails', 'additionalNotes', e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 h-24"
-            placeholder="Any specific requirements or information about your program"
-          ></textarea>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Render completion step
-const renderCompletionStep = () => {
-  return (
-    <div className="text-center space-y-6">
-      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-        <svg className="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      
-      <h2 className="text-2xl font-bold">Your Portal is Ready!</h2>
-      <p className="text-gray-600 max-w-md mx-auto">
-        Your company admin portal has been successfully created and is ready to use.
-      </p>
-      
-      <div className="bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
-        <div className="mb-3">
-          <p className="text-sm text-gray-500">Portal URL</p>
-          <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span className="font-medium">{portalInfo?.portalUrl || "URL not available"}</span>
-            <button 
-              onClick={() => handleCopyToClipboard(portalInfo?.portalUrl)}
-              className="text-indigo-600 text-sm"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-        
-        <div className="mb-3">
-          <p className="text-sm text-gray-500">Admin Email</p>
-          <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span>{portalInfo?.credentials?.email || "Email not available"}</span>
-          </div>
-        </div>
-        
-        <div>
-          <p className="text-sm text-gray-500">Temporary Password</p>
-          <div className="flex items-center justify-between bg-white p-2 rounded border">
-            <span>{portalInfo?.credentials?.tempPassword || "Password not available"}</span>
-            <button 
-              onClick={() => handleCopyToClipboard(portalInfo?.credentials?.tempPassword)}
-              className="text-indigo-600 text-sm"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div className="mt-6">
-        <p className="text-sm text-gray-500 mb-2">
-          We've sent these details to the admin email address provided.
-        </p>
-        <a 
-          href="/login" 
-          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Go to Portal
-          <svg className="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          <svg className="h-5 w-5 mr-2 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-        </a>
+          GLP-1 Program Details
+        </h2>
+        <div className="space-y-3">
+          <div>
+            <label className="block mb-1 font-medium">Planned Start Date *</label>
+            <input
+              type="date"
+              value={formData.planDetails.startDate}
+              onChange={(e) => updateFormData('planDetails', 'startDate', e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Estimated Number of Participants *</label>
+            <input
+              type="number"
+              value={formData.planDetails.estimatedUsers}
+              onChange={(e) => updateFormData('planDetails', 'estimatedUsers', e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="100"
+              min="1"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Additional Notes</label>
+            <textarea
+              value={formData.planDetails.additionalNotes}
+              onChange={(e) => updateFormData('planDetails', 'additionalNotes', e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 h-24"
+              placeholder="Any specific requirements or information about your program"
+            ></textarea>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-// Return the full JSX for the component
-return (
-  <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-extrabold text-gray-900">eMed GLP-1 Program</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Set up your company portal for the GLP-1 Medication Program
+  // Render completion step
+  const renderCompletionStep = () => {
+    // Generate a portal ID based on the company name for demo purposes
+    const portalUrlSegment = portalInfo?.portalUrl 
+      ? portalInfo.portalUrl.split('/').pop() 
+      : formData.companyName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    // Map the portal name to one of our demo portal IDs if possible
+    let demoPortalId = 'acme'; // default
+    if (formData.industry === 'Healthcare' || portalUrlSegment.includes('health') || portalUrlSegment.includes('medical')) {
+      demoPortalId = 'healthco';
+    } else if (formData.industry === 'Retail' || portalUrlSegment.includes('retail') || portalUrlSegment.includes('shop')) {
+      demoPortalId = 'globalretail';
+    }
+
+    return (
+      <div className="text-center space-y-6">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <svg className="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        
+        <h2 className="text-2xl font-bold">Your Portal is Ready!</h2>
+        <p className="text-gray-600 max-w-md mx-auto">
+          Your company admin portal has been successfully created and is ready to use.
         </p>
         
-        <div className="mt-4">
-          <a href="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
-            Already have an account? Sign in
+        <div className="bg-gray-50 p-4 rounded-lg max-w-md mx-auto">
+          <div className="mb-3">
+            <p className="text-sm text-gray-500">Portal URL</p>
+            <div className="flex items-center justify-between bg-white p-2 rounded border">
+              <span className="font-medium">{portalInfo?.portalUrl || "URL not available"}</span>
+              <button 
+                onClick={() => handleCopyToClipboard(portalInfo?.portalUrl)}
+                className="text-indigo-600 text-sm"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+          
+          <div className="mb-3">
+            <p className="text-sm text-gray-500">Admin Email</p>
+            <div className="flex items-center justify-between bg-white p-2 rounded border">
+              <span>{portalInfo?.credentials?.email || "Email not available"}</span>
+            </div>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500">Temporary Password</p>
+            <div className="flex items-center justify-between bg-white p-2 rounded border">
+              <span>{portalInfo?.credentials?.tempPassword || "Password not available"}</span>
+              <button 
+                onClick={() => handleCopyToClipboard(portalInfo?.credentials?.tempPassword)}
+                className="text-indigo-600 text-sm"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-6">
+          <p className="text-sm text-gray-500 mb-2">
+            We've sent these details to the admin email address provided.
+          </p>
+          <a 
+            href={`/portal/${demoPortalId}`}
+            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Go to Portal
+            <svg className="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </a>
         </div>
       </div>
-      
-      <div className="bg-white shadow-md rounded-lg p-6 sm:p-8">
-        {error && (
-          <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <span className="block sm:inline">{error}</span>
+    );
+  };
+  
+  // Return the full JSX for the component
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-extrabold text-gray-900">eMed GLP-1 Program</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Set up your company portal for the GLP-1 Medication Program
+          </p>
+          
+          <div className="mt-4">
+            <a href="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
+              Already have an account? Sign in
+            </a>
           </div>
-        )}
+        </div>
         
-        {!isComplete ? (
-          <>
-            {renderStepIndicator()}
-            
-            <div className="mb-8">
-              {step === 1 && renderCompanyInfoStep()}
-              {step === 2 && renderPrimaryContactStep()}
-              {step === 3 && renderAdminUserStep()}
-              {step === 4 && renderProgramDetailsStep()}
+        <div className="bg-white shadow-md rounded-lg p-6 sm:p-8">
+          {error && (
+            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <span className="block sm:inline">{error}</span>
             </div>
-            
-            <div className="flex justify-between">
-              {step > 1 ? (
-                <button 
-                  onClick={handleBack}
-                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Back
-                </button>
-              ) : (
-                <div></div>
-              )}
+          )}
+          
+          {!isComplete ? (
+            <>
+              {renderStepIndicator()}
               
-              {step < 4 ? (
-                <button 
-                  onClick={handleNext}
-                  disabled={!validateStep(step)}
-                  className={`px-4 py-2 rounded text-white flex items-center ${
-                    validateStep(step) 
-                      ? 'bg-indigo-600 hover:bg-indigo-700' 
-                      : 'bg-indigo-300 cursor-not-allowed'
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
-                >
-                  Next
-                  <svg className="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ) : (
-                <button 
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !validateStep(step)}
-                  className={`px-4 py-2 rounded text-white flex items-center ${
-                    isSubmitting || !validateStep(step)
-                      ? 'bg-indigo-300 cursor-not-allowed' 
-                      : 'bg-indigo-600 hover:bg-indigo-700'
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating Portal...
-                    </>
-                  ) : (
-                    'Create Portal'
-                  )}
-                </button>
-              )}
-            </div>
-          </>
-        ) : (
-          renderCompletionStep()
-        )}
+              <div className="mb-8">
+                {step === 1 && renderCompanyInfoStep()}
+                {step === 2 && renderPrimaryContactStep()}
+                {step === 3 && renderAdminUserStep()}
+                {step === 4 && renderProgramDetailsStep()}
+              </div>
+              
+              <div className="flex justify-between">
+                {step > 1 ? (
+                  <button 
+                    onClick={handleBack}
+                    className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Back
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+                
+                {step < 4 ? (
+                  <button 
+                    onClick={handleNext}
+                    disabled={!validateStep(step)}
+                    className={`px-4 py-2 rounded text-white flex items-center ${
+                      validateStep(step) 
+                        ? 'bg-indigo-600 hover:bg-indigo-700' 
+                        : 'bg-indigo-300 cursor-not-allowed'
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                  >
+                    Next
+                    <svg className="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={isSubmitting || !validateStep(step)}
+                    className={`px-4 py-2 rounded text-white flex items-center ${
+                      isSubmitting || !validateStep(step)
+                        ? 'bg-indigo-300 cursor-not-allowed' 
+                        : 'bg-indigo-600 hover:bg-indigo-700'
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating Portal...
+                      </>
+                    ) : (
+                      'Create Portal'
+                    )}
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            renderCompletionStep()
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ProvisioningPage;

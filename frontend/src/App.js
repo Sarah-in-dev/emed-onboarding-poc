@@ -7,6 +7,7 @@ import EmployeesPage from './pages/EmployeesPage';
 import CodesPage from './pages/CodesPage';
 import ProvisioningPage from './pages/ProvisioningPage';
 import EnrollmentPage from './pages/EnrollmentPage';
+import DemoPortalPage from './pages/DemoPortalPage'; // Import the new component
 import './App.css';
 
 // Protected route component
@@ -25,8 +26,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Add this new route to handle portal URLs */}
-          <Route path="/portal/*" element={<Navigate to="/login" />} />
+          {/* Demo portal routes - both with and without specific portal ID */}
+          <Route path="/portal" element={<DemoPortalPage />} />
+          <Route path="/portal/:portalId" element={<DemoPortalPage />} />
           
           <Route path="/login" element={<LoginPage />} />
           <Route path="/provision" element={<ProvisioningPage />} />
