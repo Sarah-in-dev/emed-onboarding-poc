@@ -6,23 +6,106 @@ import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
   const { company } = useAuth();
-  const [metrics, setMetrics] = useState(null);
+  const [metrics, setMetrics] = useState({
+    total_enrolled: 0,
+    total_employees: 0,
+    active_users: 0,
+    total_prescriptions: 0
+  });
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Check if we're in demo mode based on token
+  const isDemoMode = localStorage.getItem('token')?.startsWith('demo-token') || false;
   
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Fetch metrics
-        const metricsResponse = await api.getMetrics();
-        setMetrics(metricsResponse.data);
+        // If demo mode, use mock data
+        if (isDemoMode) {
+          // Mock metrics based on company info if available
+          const companySize = company?.size ? parseInt(company.size.split('-')[0]) || 200 : 200;
+          const enrollmentRate = Math.floor(Math.random() * 30) + 65; // 65-95%
+          const enrolledCount = Math.floor(companySize * (enrollmentRate / 100));
+          const activeRate = Math.floor(Math.random() * 20) + 75; // 75-95%
+          const activeCount = Math.floor(enrolledCount * (activeRate / 100));
+          
+          const mockMetrics = {
+            total_enrolled: enrolledCount,
+            total_employees: companySize,
+            active_users: activeCount,
+            total_prescriptions: Math.floor(activeCount * 0.8)
+          };
+          setMetrics(mockMetrics);
+          
+          // Create mock employees with company specific data
+          const companyName = company?.name || 'Demo Company';
+          const companyDomain = companyName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+          
+          const firstNames = ['John', 'Emma', 'Michael', 'Olivia', 'William', 'Sophia', 'James', 'Ava', 'Benjamin', 'Isabella'];
+          const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+          
+          const mockEmployees = [];
+          
+          // Generate 5 random employees
+          for (let i = 0; i < 5; i++) {
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const fullName = `${firstName} ${lastName}`;
+            const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${companyDomain}`;
+            
+            // Generate a date within the last 3 months
+            const enrollmentDate = new Date();
+            enrollmentDate.setDate(enrollmentDate.getDate() - Math.floor(Math.random() * 90));
+            
+            mockEmployees.push({
+              user_id: i + 1,
+              name: fullName,
+              email: email,
+              enrollment_date: enrollmentDate.toISOString(),
+              status: Math.random() > 0.1 ? 'active' : 'inactive', // 90% active
+              emed_identifier: `EMED-${companyName.substring(0, 3).toUpperCase()}-${(1000 + i).toString()}`
+            });
+          }
+          
+          // Sort by most recent enrollment
+          mockEmployees.sort((a, b) => new Date(b.enrollment_date) - new Date(a.enrollment_date));
+          
+          setEmployees(mockEmployees);
+          setLoading(false);
+          return;
+        }
         
-        // Fetch recent employees
-        const employeesResponse = await api.getEmployees('active');
-        setEmployees(employeesResponse.data.slice(0, 5)); // Show only 5 most recent
+        // Normal API fetch for real data mode
+        try {
+          // Fetch metrics
+          const metricsResponse = await api.getMetrics();
+          setMetrics(metricsResponse.data);
+          
+          // Fetch recent employees
+          const employeesResponse = await api.getEmployees('active');
+          setEmployees(employeesResponse.data.slice(0, 5)); // Show only 5 most recent
+        } catch (apiError) {
+          console.error('API fetch error:', apiError);
+          
+          // Fallback to mock data if API fails
+          setMetrics({
+            total_enrolled: 0,
+            total_employees: 0,
+            active_users: 0,
+            total_prescriptions: 0
+          });
+          
+          setEmployees([]);
+          
+          // Only set error if we're not in demo mode
+          if (!isDemoMode) {
+            setError('Failed to load dashboard data. Please try again later.');
+          }
+        }
         
         setLoading(false);
       } catch (err) {
@@ -33,7 +116,7 @@ const DashboardPage = () => {
     };
     
     fetchData();
-  }, []);
+  }, [company, isDemoMode]);
   
   if (loading) {
     return (
@@ -62,8 +145,14 @@ const DashboardPage = () => {
   return (
     <Layout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome, {company?.name}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Welcome, {company?.name || 'Demo Company'}</h1>
         <p className="text-gray-600">GLP-1 Medication Program Dashboard</p>
+        
+        {isDemoMode && (
+          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+            You are currently viewing a demo dashboard with simulated data.
+          </div>
+        )}
       </div>
       
       {/* Metrics cards */}
@@ -131,7 +220,7 @@ const DashboardPage = () => {
             <h3 className="text-lg font-medium text-gray-900">Recent Enrollments</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {employees.length > 0 ? (
+            {employees && employees.length > 0 ? (
               employees.map((employee) => (
                 <div key={employee.user_id} className="px-6 py-4">
                   <div className="flex justify-between">
@@ -182,6 +271,27 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+      
+      {isDemoMode && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Demo Information</h3>
+          <p className="text-sm text-gray-600 mb-3">
+            This is a demonstration of the eMed GLP-1 Medication Program dashboard. The data shown is simulated.
+          </p>
+          <p className="text-sm text-gray-600">
+            In a real implementation, this dashboard would show actual enrollment data, active participants, 
+            and prescription information for your company's GLP-1 medication program.
+          </p>
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Feel free to explore:</h4>
+            <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
+              <li>View and manage enrolled employees</li>
+              <li>Generate new enrollment codes</li>
+              <li>Monitor program metrics and effectiveness</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
