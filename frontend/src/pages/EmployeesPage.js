@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../services/api';
 
-
 const EmployeesPage = () => {
+  // Check if in demo mode
   const isDemoMode = localStorage.getItem('token')?.startsWith('demo-token') || false;
+  
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,6 +66,12 @@ const EmployeesPage = () => {
     <Layout>
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Enrolled Employees</h1>
+        
+        {isDemoMode && (
+          <div className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded border border-blue-200">
+            Demo Mode
+          </div>
+        )}
       </div>
       
       <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -143,7 +150,7 @@ const EmployeesPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {employees.length > 0 ? (
+                {employees && employees.length > 0 ? (
                   employees.map((employee) => (
                     <tr key={employee.user_id}>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -244,6 +251,21 @@ const EmployeesPage = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Demo mode information */}
+      {isDemoMode && (
+        <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Demo Information</h3>
+          <p className="text-sm text-gray-600">
+            This is a demonstration of the employee management page. You can search for employees, 
+            toggle visibility of inactive employees, and simulate deactivating employees.
+          </p>
+          <p className="text-sm text-gray-600 mt-2">
+            In a production environment, this page would connect to your company database to display 
+            actual enrolled employees in your GLP-1 program.
+          </p>
         </div>
       )}
     </Layout>
