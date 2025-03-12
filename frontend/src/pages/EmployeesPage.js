@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../services/api';
 
-const isDemoMode = localStorage.getItem('token')?.startsWith('demo-token') || false;
 
 const EmployeesPage = () => {
+  const isDemoMode = localStorage.getItem('token')?.startsWith('demo-token') || false;
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
